@@ -1,132 +1,122 @@
 
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, Users, Calendar, MessageSquare } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowRight, CheckCircle, Users, Calendar, MessageSquare } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
-  const navigate = useNavigate();
-
-  const features = [
-    {
-      icon: <Users className="h-8 w-8 text-blue-600" />,
-      title: "Team Collaboration",
-      description: "Work together with role-based access control and project visibility settings"
-    },
-    {
-      icon: <CheckCircle className="h-8 w-8 text-green-600" />,
-      title: "Task Management",
-      description: "Create, assign, and track tasks with multiple assignees and status updates"
-    },
-    {
-      icon: <MessageSquare className="h-8 w-8 text-purple-600" />,
-      title: "Nested Comments",
-      description: "Engage in detailed discussions with threaded comments on every task"
-    },
-    {
-      icon: <Calendar className="h-8 w-8 text-orange-600" />,
-      title: "Activity Tracking",
-      description: "Keep track of all project activities and team member contributions"
-    }
-  ];
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            ProjectHub
+          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+            Project Management
+            <span className="text-blue-600"> Made Simple</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            A comprehensive project management platform designed for modern teams. 
-            Organize projects, manage tasks, and collaborate seamlessly.
+            Organize your projects, collaborate with your team, and track progress all in one place.
           </p>
           <div className="flex gap-4 justify-center">
-            <Button 
-              size="lg" 
-              onClick={() => navigate('/dashboard')}
-              className="px-8 py-3 text-lg"
-            >
-              Get Started
-            </Button>
-            <Button 
-              variant="outline" 
-              size="lg"
-              className="px-8 py-3 text-lg"
-            >
-              Learn More
-            </Button>
+            {user ? (
+              <Link to="/dashboard">
+                <Button size="lg" className="flex items-center gap-2">
+                  Go to Dashboard
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link to="/auth">
+                  <Button size="lg" className="flex items-center gap-2">
+                    Get Started
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link to="/auth">
+                  <Button variant="outline" size="lg">
+                    Sign In
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          {features.map((feature, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow">
-              <CardHeader className="text-center">
-                <div className="flex justify-center mb-4">
-                  {feature.icon}
-                </div>
-                <CardTitle className="text-lg">{feature.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-center">
-                  {feature.description}
-                </CardDescription>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <div className="grid md:grid-cols-3 gap-8 mb-16">
+          <Card>
+            <CardHeader>
+              <CheckCircle className="h-8 w-8 text-blue-600 mb-2" />
+              <CardTitle>Task Management</CardTitle>
+              <CardDescription>
+                Create, assign, and track tasks with multiple status levels and due dates.
+              </CardDescription>
+            </CardHeader>
+          </Card>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8 mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8">Key Features</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-xl font-semibold mb-4">Role-Based Access</h3>
-              <ul className="space-y-2 text-gray-600">
-                <li>• Admin, Manager, Developer, and User roles</li>
-                <li>• Project-specific permissions</li>
-                <li>• Secure access control</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-4">Project Management</h3>
-              <ul className="space-y-2 text-gray-600">
-                <li>• Private, Team, and Public visibility</li>
-                <li>• Multi-member projects</li>
-                <li>• Comprehensive task tracking</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-4">Task System</h3>
-              <ul className="space-y-2 text-gray-600">
-                <li>• Multiple assignees per task</li>
-                <li>• Status tracking and updates</li>
-                <li>• Time-based scheduling</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-4">Communication</h3>
-              <ul className="space-y-2 text-gray-600">
-                <li>• Nested comment threads</li>
-                <li>• Real-time notifications</li>
-                <li>• Activity logging</li>
-              </ul>
-            </div>
-          </div>
+          <Card>
+            <CardHeader>
+              <Users className="h-8 w-8 text-green-600 mb-2" />
+              <CardTitle>Team Collaboration</CardTitle>
+              <CardDescription>
+                Work together with role-based permissions and real-time updates.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <MessageSquare className="h-8 w-8 text-purple-600 mb-2" />
+              <CardTitle>Communication</CardTitle>
+              <CardDescription>
+                Stay connected with nested comments and activity tracking.
+              </CardDescription>
+            </CardHeader>
+          </Card>
         </div>
 
         <div className="text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
-          <p className="text-gray-600 mb-8">
-            Join thousands of teams already using ProjectHub to manage their projects efficiently.
-          </p>
-          <Button 
-            size="lg" 
-            onClick={() => navigate('/dashboard')}
-            className="px-12 py-4 text-lg"
-          >
-            Start Your First Project
-          </Button>
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">
+            Everything you need to manage projects effectively
+          </h2>
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div className="text-left">
+              <h3 className="text-xl font-semibold mb-4">For Teams</h3>
+              <ul className="space-y-2 text-gray-600">
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  Multi-user collaboration
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  Role-based permissions
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  Real-time updates
+                </li>
+              </ul>
+            </div>
+            <div className="text-left">
+              <h3 className="text-xl font-semibold mb-4">For Projects</h3>
+              <ul className="space-y-2 text-gray-600">
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  Task assignment and tracking
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  Nested comments system
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  Activity monitoring
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </div>

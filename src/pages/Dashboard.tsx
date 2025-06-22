@@ -3,10 +3,13 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Users, Calendar, Activity } from 'lucide-react';
+import { Plus, Users, Calendar, Activity, LogOut } from 'lucide-react';
 import { ProjectCard } from '@/components/ProjectCard';
 import { CreateProjectModal } from '@/components/CreateProjectModal';
 import { ActivityLog } from '@/components/ActivityLog';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface Project {
   id: string;
@@ -21,44 +24,82 @@ interface Project {
 
 const Dashboard = () => {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'projects' | 'activity'>('projects');
+  const { user, signOut } = useAuth();
+  const { toast } = useToast();
 
-  // Mock data for now - will be replaced with Supabase data
-  const mockProjects: Project[] = [
-    {
-      id: '1',
-      title: 'Website Redesign',
-      description: 'Complete overhaul of company website',
-      visibility: 'team',
-      created_by: 'user1',
-      member_count: 5,
-      task_count: 12,
-      completed_tasks: 8
-    },
-    {
-      id: '2',
-      title: 'Mobile App Development',
-      description: 'Native mobile application for iOS and Android',
-      visibility: 'private',
-      created_by: 'user1',
-      member_count: 3,
-      task_count: 25,
-      completed_tasks: 10
+  const fetchProjects = async () => {
+    try {
+      // Fetch projects with member counts and task statistics
+      const { data: projectsData, error: projectsError } = await supabase
+        .from('projects')
+        .select(`
+          *,
+          project_members!inner(count),
+          tasks(id, status)
+        `);
+
+      if (projectsError) throw projectsError;
+
+      const formattedProjects = projectsData?.map(project => ({
+        id: project.id,
+        title: project.title,
+        description: project.description || '',
+        visibility: project.visibility,
+        created_by: project.created_by,
+        member_count: project.project_members?.length || 0,
+        task_count: project.tasks?.length || 0,
+        completed_tasks: project.tasks?.filter((task: any) => task.status === 'completed').length || 0
+      })) || [];
+
+      setProjects(formattedProjects);
+    } catch (error: any) {
+      console.error('Error fetching projects:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch projects",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   useEffect(() => {
-    // TODO: Fetch projects from Supabase
-    setProjects(mockProjects);
-  }, []);
+    if (user) {
+      fetchProjects();
+    }
+  }, [user]);
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Project Dashboard</h1>
-          <p className="text-muted-foreground">Manage your projects and track progress</p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Project Dashboard</h1>
+            <p className="text-muted-foreground">Manage your projects and track progress</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-muted-foreground">Welcome, {user?.email}</span>
+            <Button variant="outline" onClick={handleSignOut}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
         </div>
 
         <div className="flex gap-4 mb-6">
@@ -129,6 +170,7 @@ const Dashboard = () => {
           onProjectCreated={(project) => {
             setProjects([...projects, project]);
             setShowCreateModal(false);
+            fetchProjects(); // Refresh to get accurate counts
           }}
         />
       </div>
